@@ -127,12 +127,12 @@ public class Localizator {
             return false;
         }
 
-        int treshold = 1;
+        int threshold = 2;
 
         for (int j=0; j < lines.size(); ++j) {
             Line currentLine = lines.get(j);
-            if ( Math.abs(currentLine.getY1() - y) <= treshold && Math.abs(currentLine.getY2() - y) <= treshold
-                    || (Math.abs(currentLine.getX1() - x) <= treshold && Math.abs(currentLine.getX2() - x) <= treshold )) {
+            if ( Math.abs(currentLine.getY1() - y) <= threshold && Math.abs(currentLine.getY2() - y) <= threshold
+                    || (Math.abs(currentLine.getX1() - x) <= threshold && Math.abs(currentLine.getX2() - x) <= threshold )) {
                 return false;
             }
         }
