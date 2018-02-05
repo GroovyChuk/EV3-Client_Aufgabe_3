@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -80,12 +81,21 @@ public class JRobotPanel extends JPanel{
             }
         }
 
-        drawParticles(Color.RED,graphics2D);
-        drawParticle(new Particle(virtualRobotX,65,0,0,0),Color.BLUE,graphics2D);
-        drawParticle(particles.get(hindex),Color.ORANGE,graphics2D);
+//        drawParticles(Color.RED,graphics2D);
+        //drawParticle(new Particle(virtualRobotX,65,0,0,0),Color.BLUE,graphics2D);
+//        drawParticle(particles.get(hindex),Color.ORANGE,graphics2D);
+
+        Particle particle = new Particle(80,60,250,6,12);
+        particle.rotateSensors(10);
+        drawTestParticle(particle,Color.RED,graphics2D);
         JConsolePanel.writeToConsole("Highest weight: " + particles.get(hindex).getWeight());
     }
 
+    public void drawTestParticles (Color color,Graphics2D graphics2D) {
+        ArrayList<Particle> particles = localizator.getParticles();
+        for (Particle particle : particles)
+            drawParticle(particle,Color.RED,graphics2D);
+    }
 
     public void drawParticles (Color color,Graphics2D graphics2D) {
         ArrayList<Particle> particles = localizator.getParticles();
@@ -104,6 +114,41 @@ public class JRobotPanel extends JPanel{
 
         graphics2D.drawLine(node.getPositionX() ,
                 node.getPositionY() ,endX ,endY);
+
+        graphics2D.setColor(oldColor);
+    }
+
+    private void drawTestParticle(Particle node, Color color, Graphics2D graphics2D) {
+        Color oldColor = graphics2D.getColor();
+
+        graphics2D.setColor(color);
+        graphics2D.fillOval(node.getPositionX() - (JConstants.PARTICLE_WIDTH /2),node.getPositionY() - (JConstants.PARTICLE_HEIGHT /2),JConstants.PARTICLE_WIDTH,JConstants.PARTICLE_HEIGHT);
+
+        for (int i=0;i<node.getIntersectionPoints().length;++i) {
+            graphics2D.setColor(color);
+            graphics2D.drawLine(node.getPositionX(), node.getPositionY(), (int)node.getIntersectionPoints()[i].getX(), (int)node.getIntersectionPoints()[i].getY());
+
+            Point temp_intersection,intersection = null;
+
+            float distance = -1,temp_distance = 0;
+            ArrayList<Line> lines = roomMap.getRoomLines();
+            for (Line line : lines) {
+                temp_intersection = node.findIntersection(line.getX1(), line.getY1(), line.getX2(), line.getY2(),(int)node.getIntersectionPoints()[i].getX(),(int)node.getIntersectionPoints()[i].getY());
+                if (temp_intersection != null){
+                    temp_distance = (float) Math.sqrt(Math.pow(node.getPositionX()-temp_intersection.getX(),2) + Math.pow(node.getPositionY()-temp_intersection.getY(),2));
+                    if (temp_distance < distance || distance == -1){
+                        distance = temp_distance;
+                        intersection = temp_intersection;
+                    }
+                }
+            }
+
+            graphics2D.setColor(Color.BLUE);
+            graphics2D.drawOval((int)intersection.getX() - (JConstants.PARTICLE_WIDTH /2),(int)intersection.getY() - (JConstants.PARTICLE_HEIGHT /2),5,5);
+        }
+
+
+
 
         graphics2D.setColor(oldColor);
     }

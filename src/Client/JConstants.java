@@ -5,7 +5,7 @@ import java.awt.*;
  * Created by Kalaman on 12.01.18.
  */
 public class JConstants {
-    public static final int WINDOW_SIZE_X = 1200;
+    public static final int WINDOW_SIZE_X = 1500;
     public static final int WINDOW_SIZE_Y = 550;
 
     public static final int PANEL_ROBOT_SIZE_X = 700;

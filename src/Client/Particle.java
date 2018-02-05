@@ -11,9 +11,8 @@ public class Particle {
     private int positionX;
     private int positionY;
     private float degree;
-    private float degreeSensor;
-    private int endX;
-    private int endY;
+    private float [] degreeSensor;
+    private Point [] intersectionPoints;
     private double weight;
     public Point intersection = null;
 
@@ -25,14 +24,23 @@ public class Particle {
         this.weight = weight;
     }
 
-    public Particle (int posX, int posY, float deg, float degSens, double particleWeight) {
+    public Particle (int posX, int posY, float deg, int degSensAmount, double particleWeight) {
         positionX = posX;
         positionY = posY;
         degree = deg % 360;
-        degreeSensor = degSens % 360;
+
+        int degIncr = 360 / degSensAmount;
+
+        degreeSensor = new float [degSensAmount];
+        intersectionPoints = new Point[degSensAmount];
+
+        for (int i=0;i<degreeSensor.length;++i) {
+            degreeSensor[i] = degIncr * (i + 1);
+            intersectionPoints[i] = new Point(getPositionX() + (int)(Math.cos(Math.toRadians(degreeSensor[i])) * 1000),
+                                              getPositionY() + (int)(Math.sin(Math.toRadians(degreeSensor[i])) * 1000));
+        }
+
         weight = particleWeight;
-        endX = getPositionX() + (int)(Math.cos(Math.toRadians(getSensorDegree())) * 1000);
-        endY = getPositionY() + (int)(Math.sin(Math.toRadians(getSensorDegree())) * 1000);
     }
 
     public int getPositionX() {
@@ -43,8 +51,10 @@ public class Particle {
         return positionY;
     }
 
-    public int getSensorDegree () {
-        return (int)degreeSensor;
+    public int getSensorDegree (int sensorNumber) {
+        if (sensorNumber >= degreeSensor.length)
+            return -1;
+        return (int)degreeSensor[sensorNumber];
     }
 
     public int getDegree() {
@@ -57,16 +67,33 @@ public class Particle {
     }
 
     /**
+     * Rotates all sensor positions
+     * @param degree
+     */
+    public void rotateSensors (int degree) {
+        for (int i=0;i<degreeSensor.length;++i){
+            degreeSensor[i] = (degreeSensor[i] + degree) % 360;
+            intersectionPoints[i] = new Point(getPositionX() + (int)(Math.cos(Math.toRadians(degreeSensor[i])) * 1000),
+                    getPositionY() + (int)(Math.sin(Math.toRadians(degreeSensor[i])) * 1000));
+        }
+
+    }
+
+    public Point[] getIntersectionPoints() {
+        return intersectionPoints;
+    }
+
+    /**
      * Returns the distance of the particle to a wall.
      * @param lines list of all the walls in the room
      * @return distance to wall or -1 if no intersection was found
      */
-    public float getDistanceToWall(ArrayList<Line> lines) {
+    public float getDistanceToWall(ArrayList<Line> lines, int endX, int endY) {
 
         Point temp_intersection = null;
         float distance = -1,temp_distance = 0;
         for (Line line : lines) {
-            temp_intersection = findIntersection(line.getX1(), line.getY1(), line.getX2(), line.getY2());
+            temp_intersection = findIntersection(line.getX1(), line.getY1(), line.getX2(), line.getY2(),endX,endY);
             if (temp_intersection != null){
                 temp_distance = (float) Math.sqrt(Math.pow(positionX-temp_intersection.getX(),2) + Math.pow(positionY-temp_intersection.getY(),2));
                 if (temp_distance < distance || distance == -1){
@@ -89,7 +116,7 @@ public class Particle {
      * @param sensorRange Distance measured with Ultrasonic sensor
      */
     public void evaluateParticle(RoomMap roomMap,float sensorRange){
-        float distance = getDistanceToWall(roomMap.getRoomLines());
+        float distance = 0;//getDistanceToWall(roomMap.getRoomLines(),intersectionX[0],intersectionY[0]);
 
         if (distance == -1 )
             setWeight(0);
@@ -105,7 +132,7 @@ public class Particle {
         setWeight(getWeight() / sumWeight);
     }
 
-    public Point findIntersection(int x1, int y1, int x2, int y2){
+    public Point findIntersection(int x1, int y1, int x2, int y2, int endX, int endY){
         int d = (x1-x2)*(positionY-endY) - (y1-y2)*(positionX-endX);
         if (d == 0) return null;
         int xi = ((positionX-endX)*(x1*y2-y1*x2)-(x1-x2)*(positionX*endY-positionY*endX))/d;
@@ -117,10 +144,5 @@ public class Particle {
         if (yi < Math.min(positionY,endY) || yi > Math.max(positionY,endY)) return null;
         return p;
     }
-
-	public void drawParticleLine(Color red, Graphics2D graphics2d) {
-        graphics2d.drawLine(getPositionX() ,
-                getPositionY(),endX,endY);
-	}
 
 }
