@@ -68,6 +68,7 @@ public class RoomMap {
                     else if (word.contains("y2")) {
                         word = word.replaceAll("y2=","");
                         word = word.replaceAll("\"","");
+                        word = word.replaceAll("></line>","");
 
                         y2 = Integer.parseInt(word);
                     }

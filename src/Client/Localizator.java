@@ -35,8 +35,8 @@ public class Localizator {
         ArrayList<Line> lines = roomMap.getRoomLines();
         for (int i=0;i<initParticleAmount;++i) {
 
-            int randomX = -1;
-            int randomY = -1;
+            int randomX = 0;
+            int randomY = 0;
 
             while (!isValidPosition(randomX,randomY)) {
                 randomX = (int) (Math.random() * roomMap.getSvgDiagram().getWidth());
@@ -99,7 +99,7 @@ public class Localizator {
     }
 
     public Particle generateNewParticle(Particle oldParticle, boolean random){
-        int newX = -1, newY = -1;
+        int newX = 0, newY = 0;
 
         while (!isValidPosition(newX,newY)) {
             if (random){
@@ -120,13 +120,22 @@ public class Localizator {
     public boolean isValidPosition (int x,int y) {
         ArrayList<Line> lines = roomMap.getRoomLines();
 
-        for (int j = 0; j < lines.size(); ++j) {
+        if (x == 0 && y == 0)
+            return false;
+
+        if (y >= 150 && x >= 100){
+            return false;
+        }
+
+        int treshold = 1;
+
+        for (int j=0; j < lines.size(); ++j) {
             Line currentLine = lines.get(j);
-            if (x >= currentLine.getX1() && x < currentLine.getX2() &&
-                    y >= currentLine.getY2()) {
-                return true;
+            if ( Math.abs(currentLine.getY1() - y) <= treshold && Math.abs(currentLine.getY2() - y) <= treshold
+                    || (Math.abs(currentLine.getX1() - x) <= treshold && Math.abs(currentLine.getX2() - x) <= treshold )) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }
