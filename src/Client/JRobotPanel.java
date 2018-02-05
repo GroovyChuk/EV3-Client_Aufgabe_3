@@ -25,7 +25,7 @@ public class JRobotPanel extends JPanel{
         setPreferredSize(new Dimension(JConstants.PANEL_ROBOT_SIZE_X,JConstants.WINDOW_SIZE_Y));
         setLayout(new BorderLayout());
 
-        roomMap = new RoomMap("/src/files/houses.svg");
+        roomMap = new RoomMap("/src/files/room.svg");
         localizator = new Localizator(1000, roomMap);
 
         MQTTClient mqttClient = new MQTTClient();
@@ -61,7 +61,7 @@ public class JRobotPanel extends JPanel{
         SVGDiagram svgDiagram = roomMap.getSvgDiagram();
 
         AffineTransform at = new AffineTransform();
-        at.setToScale(getWidth()/svgDiagram.getWidth(), getWidth()/svgDiagram.getWidth());
+        at.setToScale(getHeight()/svgDiagram.getHeight(), getHeight()/svgDiagram.getHeight());
         graphics2D.transform(at);
 
         try {
