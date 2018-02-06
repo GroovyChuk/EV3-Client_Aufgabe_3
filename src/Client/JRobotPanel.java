@@ -19,28 +19,29 @@ public class JRobotPanel extends JPanel{
     public static Localizator localizator;
     RoomMap roomMap;
 
-    int virtualRobotX = 0;
-    int virtualRobotStep = 10;
+    int virtualRobotX = 72;
+    int virtualRobotY = 66;
+    public static int virtualRobotStep = 0;
 
     public JRobotPanel() {
         setPreferredSize(new Dimension(JConstants.PANEL_ROBOT_SIZE_X,JConstants.WINDOW_SIZE_Y));
         setLayout(new BorderLayout());
 
         roomMap = new RoomMap("/src/files/room.svg");
-        localizator = new Localizator(1000, roomMap);
+        localizator = new Localizator(JConstants.PARTICLE_AMOUNT, roomMap);
 
         MQTTClient mqttClient = new MQTTClient();
         mqttClient.addMQTTListener(new MQTTClient.MQTTListener() {
             @Override
-            public void onDriveReceived(float distanceInCM) {
-
-            }
-
-            @Override
-            public void onUltrasonicDistanceReceived(float distanceInCM) {
-                JConsolePanel.writeToConsole("New distance to wall: " + distanceInCM);
+            public void onUltrasonicDistanceReceived(double [] distanceInCM,boolean xaxis) {
+                JConsolePanel.writeToConsole("New distances to walls: " + distanceInCM);
                 JRobotPanel.localizator.filterParticles(distanceInCM);
-                virtualRobotX += virtualRobotStep;
+
+                if (xaxis)
+                    virtualRobotX += virtualRobotStep;
+                else
+                    virtualRobotY += virtualRobotStep;
+
                 repaint();
             }
 
@@ -81,13 +82,13 @@ public class JRobotPanel extends JPanel{
             }
         }
 
-//        drawParticles(Color.RED,graphics2D);
-        //drawParticle(new Particle(virtualRobotX,65,0,0,0),Color.BLUE,graphics2D);
-//        drawParticle(particles.get(hindex),Color.ORANGE,graphics2D);
+        drawParticles(Color.RED,graphics2D);
+        drawParticle(new Particle(virtualRobotX,virtualRobotY,0,1,0),Color.BLUE,graphics2D);
+        drawParticle(particles.get(hindex),Color.ORANGE,graphics2D);
 
-        Particle particle = new Particle(80,60,250,6,12);
-        particle.rotateSensors(10);
-        drawTestParticle(particle,Color.RED,graphics2D);
+//        Particle particle = new Particle(80,60,250,6,12);
+//        particle.rotateSensors(10);
+//        drawTestParticle(particle,Color.RED,graphics2D);
         JConsolePanel.writeToConsole("Highest weight: " + particles.get(hindex).getWeight());
     }
 
