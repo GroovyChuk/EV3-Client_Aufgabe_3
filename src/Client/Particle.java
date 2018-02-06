@@ -11,7 +11,7 @@ public class Particle {
     private int positionX;
     private int positionY;
     private float degree;
-    private float [] degreeSensor;
+    private double [] degreeSensor;
     private Point [] intersectionPoints;
     private double weight;
     public Point intersection = null;
@@ -31,7 +31,7 @@ public class Particle {
 
         int degIncr = 360 / degSensAmount;
 
-        degreeSensor = new float [degSensAmount];
+        degreeSensor = new double [degSensAmount];
         intersectionPoints = new Point[degSensAmount];
 
         for (int i=0;i<degreeSensor.length;++i) {
@@ -70,7 +70,9 @@ public class Particle {
      * Rotates all sensor positions
      * @param degree
      */
-    public void rotateSensors (int degree) {
+    public void rotate(int degree) {
+        this.degree = (this.degree + degree) % 360;
+
         for (int i=0;i<degreeSensor.length;++i){
             degreeSensor[i] = (degreeSensor[i] + degree) % 360;
             intersectionPoints[i] = new Point(getPositionX() + (int)(Math.cos(Math.toRadians(degreeSensor[i])) * 1000),
@@ -113,19 +115,27 @@ public class Particle {
     /**
      * Sets the weight of the particle, depending on the measured distance
      * @param roomMap
-     * @param sensorRange Distance measured with Ultrasonic sensor
+     * @param sensorRanges Distances measured with Ultrasonic sensor
      */
-    public void evaluateParticle(RoomMap roomMap,float sensorRange){
-        float distance = 0;//getDistanceToWall(roomMap.getRoomLines(),intersectionX[0],intersectionY[0]);
+    public void evaluateParticle(RoomMap roomMap,double [] sensorRanges){
 
-        if (distance == -1 )
-            setWeight(0);
-        else {
-            if (sensorRange > distance)
-                weight *= distance / sensorRange;
-            else
-                weight *= sensorRange / distance;
+        double [] distances = new double[sensorRanges.length];
+
+        for (int i=0;i<sensorRanges.length;++i) {
+            distances[i] = getDistanceToWall(roomMap.getRoomLines(),(int)intersectionPoints[i].getX(),(int)intersectionPoints[i].getY());
         }
+
+        double belief = 0;
+
+        for (int i=0;i<sensorRanges.length;++i)
+        {
+            if (sensorRanges[i] > distances[i])
+                belief += (distances[i] / sensorRanges[i]);
+            else
+                belief += (sensorRanges[i] / distances[i]);
+        }
+
+        weight *= belief;
     }
 
     public void normalize (double sumWeight) {
