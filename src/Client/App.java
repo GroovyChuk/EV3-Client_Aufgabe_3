@@ -12,8 +12,6 @@ public class App {
 
         JMainFrame frame = new JMainFrame();
 
-
-
     }
 
 

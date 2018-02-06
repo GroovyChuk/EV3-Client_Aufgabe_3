@@ -9,7 +9,6 @@ import java.awt.event.ActionListener;
 public class JConsolePanel extends JPanel{
     public static JTextArea consoleTextArea;
     public static JTextField textFieldDriveFetch;
-
     public static JButton buttonDriveFetch;
 
     public JConsolePanel() {
@@ -54,8 +53,10 @@ public class JConsolePanel extends JPanel{
         buttonDriveFetch.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String driveCM = textFieldDriveFetch.getText();
-                MQTTClient.publish(driveCM, MQTTClient.TOPIC_DRIVE);
+                String command = textFieldDriveFetch.getText();
+                JRobotPanel.virtualRobotStep = Integer.parseInt(command.split("#")[1]);
+                command += "#" + JConstants.PARTICLE_SENSOR_AMOUNT;
+                MQTTClient.publish(command, MQTTClient.TOPIC_DRIVE);
             }
         });
     }
