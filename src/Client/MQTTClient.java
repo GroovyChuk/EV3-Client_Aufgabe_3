@@ -1,9 +1,12 @@
 package src.Client;
 
 import org.fusesource.mqtt.client.*;
+import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+
+import static src.Client.JConstants.PARTICLE_SENSOR_AMOUNT;
 
 /**
  * Created by Kalaman on 09.01.18.
@@ -42,8 +45,7 @@ public class MQTTClient {
 
     public interface MQTTListener {
         public void onLogReceived(String jsonData);
-        public void onDriveReceived(float distanceInCM);
-        public void onUltrasonicDistanceReceived(float distanceInCM);
+        public void onUltrasonicDistanceReceived(double [] distancesInCM,boolean xaxis);
     }
 
     public boolean addMQTTListener(MQTTListener listener) {
@@ -67,23 +69,26 @@ public class MQTTClient {
                             for (MQTTListener listener : mqttListener)
                                 listener.onLogReceived(payload);
                         }
-                        else if (message.getTopic().equals(TOPIC_DRIVE))
-                        {
-                            float distance = Float.parseFloat(payload) / (float)100;
-
-                            for (MQTTListener listener : mqttListener)
-                                listener.onDriveReceived(distance);
-                        }
                         else if (message.getTopic().equals(TOPIC_SONIC_DISTANCE)){
-                            float sonicDistance = Float.parseFloat(payload);
+                            double [] degreeSensor = new double[PARTICLE_SENSOR_AMOUNT];
+
+                            JSONObject obj = new JSONObject(payload);
+                            int degIncr = 360 / JConstants.PARTICLE_SENSOR_AMOUNT;
+
+                            boolean xaxis = obj.getBoolean("x_axis");
+
+                            for (int i=0;i<PARTICLE_SENSOR_AMOUNT;++i) {
+                                degreeSensor[i] = obj.getDouble(String.valueOf(degIncr * (i+1)));
+                            }
 
                             for (MQTTListener listener : mqttListener)
-                                listener.onUltrasonicDistanceReceived(sonicDistance);
+                                listener.onUltrasonicDistanceReceived(degreeSensor,xaxis);
                         }
                         message.ack();
                     }
                 }
                 catch (Exception e) {
+                    System.out.println("Sind beide ParticleSensorAmounts gleich ?");
                     e.printStackTrace();
                 }
             }
