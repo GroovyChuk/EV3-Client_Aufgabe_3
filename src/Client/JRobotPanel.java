@@ -87,7 +87,7 @@ public class JRobotPanel extends JPanel{
         drawParticle(particles.get(hindex),Color.ORANGE,graphics2D);
 
 //        Particle particle = new Particle(80,60,250,6,12);
-//        particle.rotateSensors(10);
+//        particle.rotate(10);
 //        drawTestParticle(particle,Color.RED,graphics2D);
         JConsolePanel.writeToConsole("Highest weight: " + particles.get(hindex).getWeight());
     }

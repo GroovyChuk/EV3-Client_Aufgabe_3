@@ -3,9 +3,7 @@ package src.Client;
 /**
  * Created by Kalaman on 17.01.18.
  */
-import java.awt.*;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.kitfox.svg.SVGDiagram;
@@ -45,25 +43,26 @@ public class Localizator {
 
             float randomDeg = (float) (Math.random() * 360) ;
 
-            particleList.add(new Particle(randomX,randomY,randomDeg,4,1f / JConstants.PARTICLE_AMOUNT));
+            particleList.add(new Particle(randomX,randomY,randomDeg,JConstants.PARTICLE_SENSOR_AMOUNT,1f / JConstants.PARTICLE_AMOUNT));
         }
     }
 
     /**
      * Performs the resampling of Particles according to the weights
-     * @param sensorRange
+     * @param sensorRanges
      */
-    public void filterParticles(float sensorRange){
+    public void filterParticles(double [] sensorRanges){
         ArrayList<Particle> temp_particleList = new ArrayList<>();
         double sumValue = 0;
 
         for (Particle particle : particleList) {
             if (!first)
-                particle.move(10);
-            particle.evaluateParticle(roomMap,sensorRange);
+                particle.move(JRobotPanel.virtualRobotStep);
+            particle.evaluateParticle(roomMap,sensorRanges);
             sumValue += particle.getWeight();
         }
         first = false;
+
         for (Particle particle: particleList) {
             particle.normalize(sumValue);
         }
@@ -111,9 +110,9 @@ public class Localizator {
             }
         }
         int newDegree =  ThreadLocalRandom.current().nextInt(oldParticle.getDegree() - 10, oldParticle.getDegree() + 10 + 1) ;
-        int newSensDegree =  ThreadLocalRandom.current().nextInt(oldParticle.getSensorDegree(0) - 10, oldParticle.getSensorDegree(0) + 10 + 1) ;
 
-        Particle newParticle = new Particle(newX, newY, newDegree,newSensDegree,oldParticle.getWeight());
+        Particle newParticle = new Particle(newX, newY, newDegree, JConstants.PARTICLE_SENSOR_AMOUNT,oldParticle.getWeight());
+        newParticle.rotate(ThreadLocalRandom.current().nextInt(-30, 30));
         return newParticle;
     }
 
@@ -127,7 +126,7 @@ public class Localizator {
             return false;
         }
 
-        int threshold = 2;
+        int threshold = 0;
 
         for (int j=0; j < lines.size(); ++j) {
             Line currentLine = lines.get(j);
